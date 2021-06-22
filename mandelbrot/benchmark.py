@@ -19,11 +19,13 @@ allocate memory, we do it this way.
 import numpy as np
 import time
 
-import mandelbrot as mb
+import solutions as sol
 
-methods = [#'mb.naive_solution(detail, rVals, iVals, res)',
-           'mb.jit_naive_solution(detail, rVals, iVals, res)',
-           'mb.njit_naive_solution(detail, rVals, iVals, res)']
+methods = [#'sol.naive_solution(detail, rVals, iVals, res)',
+           'sol.jit_naive_solution(detail, rVals, iVals, res)',
+           'sol.njit_par_naive_solution(detail, rVals, iVals, res)',
+           'sol.vectorised_solution(detail, rVals, iVals, res)',
+           'sol.gu_vectorised_solution(detail, rVals, iVals, res)']
 
 detail = 1000
 rVals = np.linspace(-2.0, 1.0, detail)
@@ -42,5 +44,5 @@ for m in methods:
     tic = time.time()
     y = eval(m)
     toc = time.time() - tic
-
-    print(f'{m:30s} : {toc:10.2e} [s]'.format(m, toc))
+    
+    print(f'{m:30s} : {toc:10.2e} [s]')

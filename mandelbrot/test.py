@@ -17,7 +17,7 @@ class TestMandelbrot(unittest.TestCase):
     def setUp(self):
         # This will contain a list of the methods we will test
         self.methods = ['mb.jit_naive_solution(X)', 
-                        'mb.jit_naive_solution(X)']
+                        'mb.njit_par_naive_solution(X)']
 
         
     def test_specific(self):
