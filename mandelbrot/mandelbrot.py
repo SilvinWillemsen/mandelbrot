@@ -1,13 +1,25 @@
 """
 
+
+
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-import mandelbrot
-import time
+from numba import jit, njit, prange
 
 
+# Took the following from Thomas' example to avoid errors when trying to run files
+    
+# No-op for use with profiling and test 
+try:
+    @profile
+    def f(x): return x
+except:
+    def profile(func):
+        def inner(*args, **kwargs):
+            return func(*args, **kwargs)
+        return inner
+
+@profile
 def M(c, I = 100, T = 2):
     
     """
@@ -31,7 +43,6 @@ def M(c, I = 100, T = 2):
         
     The lower this number is, the earlier :math:`|z|` has exceeded the
     threshold and the more unstable :math:`c` is to the iterative algorithm. 
-    These are the n
 
     INPUT::
         
@@ -39,10 +50,10 @@ def M(c, I = 100, T = 2):
             Starting point of iterative algorithm.
             
         I : number of iterations
-            DESCRIPTION.
+            Number of iterations.
             
-        T : Threshold
-            DESCRIPTION.
+        T : float
+            Threshold value.
 
     OUTPUT::
         
@@ -61,23 +72,86 @@ def M(c, I = 100, T = 2):
     # if |z| has not exceeded threshold T, return I / I = 1
     return 1
 
+@jit
+def M_jit(c, I = 100, T = 2):
+    """
+    
+    Identical function to M(c, I, T) (function above) but with a jit decorator
+    
+    """
+    z = 0
+    
+    for i in prange(I):
+        z = z*z + c
+        if abs(z) > T:
+            return(i+1) / I
+    
+    # if |z| has not exceeded threshold T, return I / I = 1
+    return 1
+
+@njit(parallel=True)
+def M_njit(c, I = 100, T = 2):
+    """
+    
+    Identical function to M(c, I, T) (function above) but with a jit decorator
+    
+    """
+    z = 0
+    
+    for i in prange(I):
+        z = z*z + c
+        if abs(z) > T:
+            return(i+1) / I
+    
+    # if |z| has not exceeded threshold T, return I / I = 1
+    return 1
+
+@profile
 def naive_solution(detail, rVals, iVals, res):
+    """
+    
+    The 'naive' solution for computing the mandelbrot set using for-loops
+
+    INPUT::
+        
+        detail : int
+            How detailed should the simulation be.
+        rVals : Numpy array of size (detail,)
+            The values for the real component of :math:`c` to iterate over.
+        iVals : Numpy array of size (detail,)
+            The values for the imaginary component of :math:`c` to iterate over.
+        res : Matrix (Numpy array of Numpy arrays of size (detail, detail))
+            Matrix of zeros that will be filled with outputs of the 
+            :math:`\\mathcal{M}` function.
+
+    OUTPUT::
+        
+    res : Matrix (Numpy array of Numpy arrays of size (detail, detail))
+            Matrix containing the result of the :math:`\\mathcal{M}` function for all 
+            values of :math`c` that this function has iterated over
+
+    """
     
     for r in range(detail):
         for i in range(detail):
-            res[i, r] = (M(rVals[r] + iVals[i]*1j, 100, 2))
-            
+            res[i, r] = (M(rVals[r] + iVals[i]*1j))
+        
     return res
             
-detail = 5000;
-rVals = np.linspace(-2.0, 1.0, detail)
-iVals = np.linspace(-1.5, 1.5, detail)
+@jit
+def jit_naive_solution(detail, rVals, iVals, res):
     
-res = np.zeros ((detail, detail))
-tic = time.time()
-res = naive_solution(detail, rVals, iVals, res)
-toc = time.time() - tic
-print(f'The naive computation of the mandelbrot set for {detail:d} x {detail:d} \
-      values of c took {toc:1.3} seconds')
+    for r in range(detail):
+        for i in range(detail):
+            res[i, r] = (M_jit(rVals[r] + iVals[i]*1j))
+        
+    return res
 
-plt.imshow (res, cmap='hot')
+@njit(parallel=True)
+def njit_naive_solution(detail, rVals, iVals, res):
+    
+    for r in prange(detail):
+        for i in prange(detail):
+            res[i, r] = (M_jit(rVals[r] + iVals[i]*1j))
+
+    return res

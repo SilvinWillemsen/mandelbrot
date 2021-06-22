@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>mandelbrot package &#8212; mandelbrot 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="mandelbrot" href="modules.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="mandelbrot-package">
+<h1>mandelbrot package<a class="headerlink" href="#mandelbrot-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-mandelbrot.mandelbrot">
+<span id="mandelbrot-mandelbrot-module"></span><h2>mandelbrot.mandelbrot module<a class="headerlink" href="#module-mandelbrot.mandelbrot" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mandelbrot.mandelbrot.M">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot.</span></span><span class="sig-name descname"><span class="pre">M</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot.html#M"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot.M" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function <span class="math notranslate nohighlight">\(\mathcal{M}(c)\)</span> implementing the iterative algorithm to 
+determine whether a complex number <span class="math notranslate nohighlight">\(c\)</span> is part of the Mandelbrot 
+set. The iterative algorithm is:</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(z_{i+1} = z_i^2 + c\)</span></p>
+</div></blockquote>
+<p>with complex number <span class="math notranslate nohighlight">\(z\)</span> and iteration number <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<p>If, after <span class="math notranslate nohighlight">\(I\)</span> iterations <span class="math notranslate nohighlight">\(|z|\)</span> has not crossed threshold 
+<span class="math notranslate nohighlight">\(T\)</span>, <span class="math notranslate nohighlight">\(c\)</span> is part of the Mandelbrot set and the function 
+returns</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(\mathcal{M}(c) = 1\)</span>.</p>
+</div></blockquote>
+<p>If instead, <span class="math notranslate nohighlight">\(|z|\)</span> has crossed the threshold, the function returns</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(\mathcal{M}(c) = \frac{i+1}{I}\)</span>.</p>
+</div></blockquote>
+<p>The lower this number is, the earlier <span class="math notranslate nohighlight">\(|z|\)</span> has exceeded the
+threshold and the more unstable <span class="math notranslate nohighlight">\(c\)</span> is to the iterative algorithm. 
+These are the n</p>
+<p>INPUT:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="p">:</span> <span class="nb">complex</span> <span class="nb">float</span>
+    <span class="n">Starting</span> <span class="n">point</span> <span class="n">of</span> <span class="n">iterative</span> <span class="n">algorithm</span><span class="o">.</span>
+
+<span class="n">I</span> <span class="p">:</span> <span class="n">number</span> <span class="n">of</span> <span class="n">iterations</span>
+    <span class="n">Number</span> <span class="n">of</span> <span class="n">iterations</span><span class="o">.</span>
+
+<span class="n">T</span> <span class="p">:</span> <span class="nb">float</span>
+    <span class="n">Threshold</span> <span class="n">value</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>OUTPUT:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">A</span> <span class="n">floating</span> <span class="n">point</span> <span class="n">value</span> <span class="n">between</span> <span class="mi">0</span> <span class="ow">and</span> <span class="mf">1.</span> <span class="n">The</span> <span class="n">closer</span> <span class="n">to</span> <span class="mi">0</span> <span class="n">the</span> <span class="k">return</span> 
+<span class="n">value</span> <span class="ow">is</span><span class="p">,</span> <span class="n">the</span> <span class="n">earlier</span> <span class="o">|</span><span class="n">z</span><span class="o">|</span> <span class="n">has</span> <span class="n">crossed</span> <span class="n">threshold</span> <span class="n">T</span> <span class="ow">and</span> <span class="n">thus</span> <span class="n">the</span> <span class="n">more</span>
+<span class="n">unstable</span> <span class="n">c</span> <span class="ow">is</span> <span class="n">to</span> <span class="n">the</span> <span class="n">iterative</span> <span class="n">algorithm</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mandelbrot.mandelbrot.jit_naive_solution">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot.</span></span><span class="sig-name descname"><span class="pre">jit_naive_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot.html#jit_naive_solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot.jit_naive_solution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mandelbrot.mandelbrot.naive_solution">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot.</span></span><span class="sig-name descname"><span class="pre">naive_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot.html#naive_solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot.naive_solution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mandelbrot.mandelbrot.njit_naive_solution">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot.</span></span><span class="sig-name descname"><span class="pre">njit_naive_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot.html#njit_naive_solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot.njit_naive_solution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mandelbrot.mandelbrot.profile">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot.</span></span><span class="sig-name descname"><span class="pre">profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot.html#profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot.profile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-mandelbrot">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mandelbrot" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">mandelbrot</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">mandelbrot</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">mandelbrot package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">mandelbrot</a><ul>
+      <li>Previous: <a href="modules.html" title="previous chapter">mandelbrot</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Silvin Willemsen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/mandelbrot.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
