@@ -4,8 +4,7 @@ This repository contains a package 'mandelbrot' that attempts to compare differe
 
 z_{i+1} = z^2 + c
 
-for complex number z, complex starting value c and iteration number i. The iterations continue until i > I, where I is the maximum number of iterations, or |z_{i+1}|
-> T for threshold T. The value saved is the number of iterations it took before either of these conditions were not met anymore over the number of iterations:
+for complex number z, complex starting value c and iteration number i. The iterations continue until i > I, where I is the maximum number of iterations, or |z_{i+1}| > T for threshold T. The value saved is the number of iterations it took before either of these conditions were not met anymore over the number of iterations:
 
 (i+1)/I
 
