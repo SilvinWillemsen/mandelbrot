@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 
 This file uses the multiprocessing module to divide the tasks when computing 
@@ -94,9 +92,13 @@ if __name__ == '__main__': # Necessary to make multiprocessing work
     pool.join()
     
     # plot the results
-    print('Plotting result...')
+    
     fig = plt.figure(figsize=(10,10))
-    plt.imshow (res, cmap='hot')
+    print('Plotting result...')
+    ax = plt.imshow (res, cmap='hot', extent=[-2.0, 1.0, -1.5, 1.5])
+    plt.xlabel('$\\mathfrak{R}(c)$')
+    plt.ylabel('$\\mathfrak{I}(c)$')
+    plt.title('Mandelbrot set generated using multiprocessing')
     plt.show()
     fig.savefig('multiprocessing_output/mandelbrot_multi_proc.pdf')
     print('Result plotted!')

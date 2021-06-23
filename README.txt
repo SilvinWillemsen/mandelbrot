@@ -24,7 +24,7 @@ The contents of the package are structured as follows:
 
 - multiprocessing_mandelbrot.py: implements multiprocessing using the multiprocessing module. The results are plotted to the multiprocessing_output/ folder. 
 
-- multiprocessing_output/plot_csv_results.py: a script that plots the number of processing units vs. the execution time and saves this to this folder. this folder as well
+- multiprocessing_output/plot_csv_results.py: a script that plots the number of processing units vs. the execution time and saves this to this folder as well.
 
 - plot_z_values.py: apart from plotting the mandelbrot set, this script saves the values for z right before the iteration stopped for all desired values of c, and plots this to a file in the plot_z_values_output/ folder.
 

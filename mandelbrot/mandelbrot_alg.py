@@ -14,14 +14,14 @@ The functions are called from the functions in optimisation_methods.py.
 
 The @profile decorator has been added to the non-optimised version of the 
 Mandelbrot calculation to see what lines of code are heaviest. It turns out
-that (on my machine) the if statement requires the most computation, around 
+that (on my machine) the if-statement requires the most computation, around 
 38.5% of the total and the calculation of :math:`z` takes aaround 33.2% of the 
 processing power. From what I see, there is not much we can do to optimise the
 code itself further.
 
 For some reason the multiprocessing_mandelbrot.py file does not run when the 
 profiling functionality is enabled. This is why it is commented out. For 
-profiling the code, uncomment this section. 
+profiling the code, uncomment this section.
 
 """
 
@@ -32,7 +32,7 @@ from numba import jit, njit, prange
 # files 
 
 # Can't run multiprocessing_mandelbrot.py if uncommented
-# UNCOMMENT THE FOLLOWING FOR PROFILING #### -> <- ####
+# UNCOMMENT THE CODE BETWEEN THE QUADRUPLE HASTAGS FOR PROFILING (#### -> <- ####)
 
 ####
 
@@ -47,10 +47,7 @@ from numba import jit, njit, prange
 #             return func(*args, **kwargs)
 #         return inner
 
-# @profile
-
-####
-
+# @profile      ####
 def M(c, I = 100, T = 2):
     
     """
@@ -91,7 +88,7 @@ def M(c, I = 100, T = 2):
         
         A floating point value between 0 and 1. The closer to 0 the return 
         value is, the earlier |z| has crossed threshold T and thus the more
-        unstable c is to the iterative algorithm
+        unstable c is to the iterative algorithm.
 
     """
     

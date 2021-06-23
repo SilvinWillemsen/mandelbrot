@@ -16,7 +16,7 @@ import mandelbrot.optimisation_methods as OM
 
 
 # specify the detail of the simulation
-detail = 5000;
+detail = 1000;
 rVals = np.linspace(-2.0, 1.0, detail)
 iVals = np.linspace(-1.5, 1.5, detail)
     
@@ -33,7 +33,10 @@ methods = ['OM.naive(detail, rVals, iVals, res)',
 
 
 # plot the results?
-plotting = False
+plotting = True
+
+# save the results to pdf?
+saving = False
 
 # run all methods
 for m in methods:
@@ -65,4 +68,5 @@ for m in methods:
         print('Showing image...')
         plt.show()
         print('Image shown')
-        fig.savefig('run_output/' + function_name + '_output.pdf')
+        if saving:
+            fig.savefig('run_output/' + function_name + '_output.pdf')

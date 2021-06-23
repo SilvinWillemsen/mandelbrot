@@ -5,6 +5,7 @@ evaluates and times them. Finally, it plots the results. Results for computing
 5000 x 5000 values of :math:`c` on my machine (2017 MacBook Pro with a 2.2 Ghz 
 Intel i7 processor) can be found in the benchmark_output folder.
 
+
 Every time a function is profiled, it is ran first to 'warm up the computer'
 (or something similar that Thomas said during the lecture). 
 
@@ -17,15 +18,13 @@ allocate memory, we do it this way.
 Results and discussion:
     
     Results show that the naive implementation is by far the slowest (as 
-    expected).  Vectorisation already helps quite a bit and causes a ca. 3.3x 
+    expected). Vectorisation already helps quite a bit and causes a ca. 3.3x 
     speedup when compared to the non-optimised method. The main speed-up, 
-    however, happens by usin!g jit-compilation which speeds the naive 
-    implementation up by around x108.3! Vectorisation after using jit 
+    however, happens by using jit-compilation which speeds the naive 
+    implementation up by around x108.3!! Vectorisation after using jit 
     compilation (using neither normal nor general ufuncs) does not change 
-    the speed by a significant amount. The parallelisation does improve the 
-    speed for a total x320.5 speed up from naive to optimised using 
-    @njit(parallel=True). 
-
+    the speed by a significant amount. The parallelisation using 
+    @njit(parallel=True) does improve the speed for a total x320.5 speed up!
                       
 """
 
@@ -52,7 +51,7 @@ methods = ['OM.naive(detail, rVals, iVals, res)',
 save_csv = False
 
 # if we want to save the resulting plots as pdf and overwrite the current ones
-save_files = True
+save_files = False
 
 # sepecify amount of detail
 detail = 5000

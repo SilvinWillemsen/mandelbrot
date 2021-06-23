@@ -26,7 +26,7 @@ multiple values of :math:`c` happen ad the same time.
 Numba, vectorize:
 - vectorised() tries to vectorise the calculation of the Mandelbrot set
 by looping through the imaginary values and calculating multiple real 
-values. The inverse was not done, as the numpy arrays used are 
+values vectorised. The inverse was not done, as the numpy arrays used are 
 C-contiguous, meaning that the values of the rows (one imaginary value
 multiple real values) are stored consecutively in memory. The function 
 calls the naive non-optimised implementation for calculating the
@@ -34,10 +34,11 @@ Mandelbrot set for comparison.
 
 - jit_vectorised() is identical to vectorised but uses the numba-optimised
 implementation of the function calculating the Mandelbrot set, as well as
-being numba-optimised itself using the @jit decorator.py
+being numba-optimised itself using the @jit decorator
 
 - gu_jit_vectorised() attempts to use general ufuncs to implement 
 vectorisation. 
+
 
 The non-optimised functions (naive() and vectorised()) have an @profile 
 decorator so that we can see what lines of code are heaviest. To profile the
@@ -48,7 +49,7 @@ repository.
 Finally, the jit_save_z() function returns -- on top of the numpy array 
 containing the outputs of the Mandelbrot functions -- the values of :math: `z` 
 from the last iteration in that function. To optimise the function, we use 
-parallelisation  using the the @njit decorator with the parallel flag set to 
+parallelisation using the the @njit decorator with the parallel flag set to 
 True as this optimisation technique was found to speed up the algorithm most
 (see benchmark.py). The jit_save_z() method is only used by plot_z_values.py. 
 
@@ -89,16 +90,16 @@ def naive(detail, rVals, iVals, res):
         iVals : Numpy array of size (detail,)
             The values for the imaginary component of c to iterate over.
             
-        res : Numpy array of floats of size (detail, detail)
+        res : Numpy array of size (detail, detail)
             Matrix of zeros that will be filled with outputs of the function 
             generating the Mandelbrot set.
 
     OUTPUT::
         
-        res : Numpy array of floats of size (detail, detail)
+        res : Numpy array of size (detail, detail)
             Matrix containing the result of the function generating the
             Mandelbrot set for all values of c that this function has iterated 
-            over
+            over.
 
     """
     
@@ -113,8 +114,8 @@ def jit_func(detail, rVals, iVals, res):
    
     """
     
-    The same 'naive' solution as the naive() but optimised with numba using 
-    the @jit decorator
+    The same 'naive' solution as naive() but optimised with numba using the 
+    @jit decorator
     
     """
    
@@ -129,7 +130,7 @@ def njit_par(detail, rVals, iVals, res):
     
     """
     
-    The same 'naive' solution as the naive() but optimised with numba using 
+    The same 'naive' solution as naive() but optimised with numba using 
     parallelisation with the @njit decorator and the parallel flag set to True.
     
     The 'range' funtions have been replaced by 'prange' to tell the compiler
@@ -255,7 +256,13 @@ def jit_save_z(detail, rVals, iVals, res, z_res, I, T):
         res : Numpy array of floats of size (detail, detail)
             Matrix of zeros that will be filled with outputs of the 
             function generating the Mandelbrot set.
-
+        
+        I : int
+            Maximum number of iterations.
+            
+        T : float
+            Threshold value.
+            
      OUTPUT::
        
         
@@ -263,7 +270,7 @@ def jit_save_z(detail, rVals, iVals, res, z_res, I, T):
             Matrix containing the last value of z before the function
             generating the Mandelbrot set returns.
             
-        res : Numpy array of floats of size (detail, detail)
+        res : Numpy array of size (detail, detail)
             Matrix containing the result of the function generating the
             Mandelbrot set for all values of c that this function has iterated 
             over.

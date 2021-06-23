@@ -1,11 +1,14 @@
 """
 
-This script retrieves and plots the z values before the function generating 
-the Mandelbrot set returns. The plot it generates is absolutely stunning so I
-wanted to include this in the project :)
+This script retrieves and plots the last-updated z value before the function 
+generating the Mandelbrot set returned. The plot it generates is absolutely 
+stunning so I wanted to include this in the project :)
 
 This function allows the number of iterations as well as the threshold to be
 changed from this script.
+
+The data is generated using the jit_save_z() function as this turned out to 
+be the fastest.
 
 """
 
