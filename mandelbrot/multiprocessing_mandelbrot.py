@@ -20,7 +20,7 @@ import numpy as np
 from numpy import matlib as ml
 import multiprocessing as mp
 import matplotlib.pyplot as plt
-from mandelbrot import M
+from mandelbrot.mandelbrot_alg import M
 import pandas as pd
 
 

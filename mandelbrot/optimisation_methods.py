@@ -6,16 +6,16 @@ detail numpy array containing the output of the functions implementing the
 Mandelbrot set.
 
 Naive implementation:
-    - naive() implements the computation of the Mandelbrot set without any
-    optimisation techniques. 
+- naive() implements the computation of the Mandelbrot set without any
+optimisation techniques. 
 
 Numba, jit:
-    - jit_func() is identical to naive() but optimised with numba using the 
-    @jit decorator
-    
-    - njit_par() is identical to naive() but optimised with numba using the
-    @njit decorator and parallelised using the (parallel=True) flag.
-    
+- jit_func() is identical to naive() but optimised with numba using the 
+@jit decorator
+
+- njit_par() is identical to naive() but optimised with numba using the
+@njit decorator and parallelised using the (parallel=True) flag.
+
     
 Due to the iterative nature of the generation of the mandelbrot set, and the 
 if-statement it contains (inevitably causing branch divergence to happen), it 
@@ -24,20 +24,20 @@ could, however, vectorise one level up, i.e., have the calculation for
 multiple values of :math:`c` happen ad the same time. 
 
 Numba, vectorize:
-    - vectorised() tries to vectorise the calculation of the Mandelbrot set
-    by looping through the imaginary values and calculating multiple real 
-    values. The inverse was not done, as the numpy arrays used are 
-    C-contiguous, meaning that the values of the rows (one imaginary value
-    multiple real values) are stored consecutively in memory. The function 
-    calls the naive non-optimised implementation for calculating the
-    Mandelbrot set for comparison.
-    
-    - jit_vectorised() is identical to vectorised but uses the numba-optimised
-    implementation of the function calculating the Mandelbrot set, as well as
-    being numba-optimised itself using the @jit decorator.
-    
-    - gu_jit_vectorised() attempts to use general ufuncs to implement 
-    vectorisation. 
+- vectorised() tries to vectorise the calculation of the Mandelbrot set
+by looping through the imaginary values and calculating multiple real 
+values. The inverse was not done, as the numpy arrays used are 
+C-contiguous, meaning that the values of the rows (one imaginary value
+multiple real values) are stored consecutively in memory. The function 
+calls the naive non-optimised implementation for calculating the
+Mandelbrot set for comparison.
+
+- jit_vectorised() is identical to vectorised but uses the numba-optimised
+implementation of the function calculating the Mandelbrot set, as well as
+being numba-optimised itself using the @jit decorator.py
+
+- gu_jit_vectorised() attempts to use general ufuncs to implement 
+vectorisation. 
 
 The non-optimised functions (naive() and vectorised()) have an @profile 
 decorator so that we can see what lines of code are heaviest. To profile the
@@ -55,10 +55,7 @@ True as this optimisation technique was found to speed up the algorithm most
 
 """
 
-import sys
-sys.path.append('../')
-
-import mandelbrot as mb
+import mandelbrot.mandelbrot_alg as mb
 from numba import jit, njit, prange, vectorize, guvectorize, float64, int64
 
 

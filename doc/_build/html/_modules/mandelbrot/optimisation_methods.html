@@ -1,0 +1,377 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mandelbrot.optimisation_methods &#8212; mandelbrot 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for mandelbrot.optimisation_methods</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">This file contains multiple methods to optimise the calculation of the </span>
+<span class="sd">Mandelbrot set in mandelbrot.py. All functions return a detail :math:`\\times`</span>
+<span class="sd">detail numpy array containing the output of the functions implementing the </span>
+<span class="sd">Mandelbrot set.</span>
+
+<span class="sd">Naive implementation:</span>
+<span class="sd">- naive() implements the computation of the Mandelbrot set without any</span>
+<span class="sd">optimisation techniques. </span>
+
+<span class="sd">Numba, jit:</span>
+<span class="sd">- jit_func() is identical to naive() but optimised with numba using the </span>
+<span class="sd">@jit decorator</span>
+
+<span class="sd">- njit_par() is identical to naive() but optimised with numba using the</span>
+<span class="sd">@njit decorator and parallelised using the (parallel=True) flag.</span>
+
+<span class="sd">    </span>
+<span class="sd">Due to the iterative nature of the generation of the mandelbrot set, and the </span>
+<span class="sd">if-statement it contains (inevitably causing branch divergence to happen), it </span>
+<span class="sd">is hard to vectorise the iterations in the Mandelbrot function itself. One </span>
+<span class="sd">could, however, vectorise one level up, i.e., have the calculation for </span>
+<span class="sd">multiple values of :math:`c` happen ad the same time. </span>
+
+<span class="sd">Numba, vectorize:</span>
+<span class="sd">- vectorised() tries to vectorise the calculation of the Mandelbrot set</span>
+<span class="sd">by looping through the imaginary values and calculating multiple real </span>
+<span class="sd">values. The inverse was not done, as the numpy arrays used are </span>
+<span class="sd">C-contiguous, meaning that the values of the rows (one imaginary value</span>
+<span class="sd">multiple real values) are stored consecutively in memory. The function </span>
+<span class="sd">calls the naive non-optimised implementation for calculating the</span>
+<span class="sd">Mandelbrot set for comparison.</span>
+
+<span class="sd">- jit_vectorised() is identical to vectorised but uses the numba-optimised</span>
+<span class="sd">implementation of the function calculating the Mandelbrot set, as well as</span>
+<span class="sd">being numba-optimised itself using the @jit decorator.py</span>
+
+<span class="sd">- gu_jit_vectorised() attempts to use general ufuncs to implement </span>
+<span class="sd">vectorisation. </span>
+
+<span class="sd">The non-optimised functions (naive() and vectorised()) have an @profile </span>
+<span class="sd">decorator so that we can see what lines of code are heaviest. To profile the</span>
+<span class="sd">functions run &quot;kernprof -l -v mandelbrot/run.py&quot; from the root of the </span>
+<span class="sd">repository.</span>
+
+
+<span class="sd">Finally, the jit_save_z() function returns -- on top of the numpy array </span>
+<span class="sd">containing the outputs of the Mandelbrot functions -- the values of :math: `z` </span>
+<span class="sd">from the last iteration in that function. To optimise the function, we use </span>
+<span class="sd">parallelisation  using the the @njit decorator with the parallel flag set to </span>
+<span class="sd">True as this optimisation technique was found to speed up the algorithm most</span>
+<span class="sd">(see benchmark.py). The jit_save_z() method is only used by plot_z_values.py. </span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">mandelbrot.mandelbrot_alg</span> <span class="k">as</span> <span class="nn">mb</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">jit</span><span class="p">,</span> <span class="n">njit</span><span class="p">,</span> <span class="n">prange</span><span class="p">,</span> <span class="n">vectorize</span><span class="p">,</span> <span class="n">guvectorize</span><span class="p">,</span> <span class="n">float64</span><span class="p">,</span> <span class="n">int64</span>
+
+
+<span class="c1"># Took the following from Thomas&#39; example to avoid errors when trying to run files</span>
+    
+<span class="c1"># No-op for use with profiling and test </span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="nd">@profile</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="n">x</span>
+<span class="k">except</span><span class="p">:</span>
+<div class="viewcode-block" id="profile"><a class="viewcode-back" href="../../mandelbrot.html#mandelbrot.optimisation_methods.profile">[docs]</a>    <span class="k">def</span> <span class="nf">profile</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">inner</span></div>
+
+<div class="viewcode-block" id="naive"><a class="viewcode-back" href="../../mandelbrot.html#mandelbrot.optimisation_methods.naive">[docs]</a><span class="nd">@profile</span>
+<span class="k">def</span> <span class="nf">naive</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">rVals</span><span class="p">,</span> <span class="n">iVals</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    The &#39;naive&#39; solution for computing the Mandelbrot set using for-loops.</span>
+
+<span class="sd">    INPUT::</span>
+<span class="sd">        </span>
+<span class="sd">        detail : int</span>
+<span class="sd">            How detailed should the simulation be.</span>
+<span class="sd">            </span>
+<span class="sd">        rVals : Numpy array of size (detail,)</span>
+<span class="sd">            The values for the real component of c to iterate over.</span>
+<span class="sd">            </span>
+<span class="sd">        iVals : Numpy array of size (detail,)</span>
+<span class="sd">            The values for the imaginary component of c to iterate over.</span>
+<span class="sd">            </span>
+<span class="sd">        res : Numpy array of floats of size (detail, detail)</span>
+<span class="sd">            Matrix of zeros that will be filled with outputs of the function </span>
+<span class="sd">            generating the Mandelbrot set.</span>
+
+<span class="sd">    OUTPUT::</span>
+<span class="sd">        </span>
+<span class="sd">        res : Numpy array of floats of size (detail, detail)</span>
+<span class="sd">            Matrix containing the result of the function generating the</span>
+<span class="sd">            Mandelbrot set for all values of c that this function has iterated </span>
+<span class="sd">            over</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">rVals</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">+</span> <span class="n">iVals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">res</span></div>
+            
+<div class="viewcode-block" id="jit_func"><a class="viewcode-back" href="../../mandelbrot.html#mandelbrot.optimisation_methods.jit_func">[docs]</a><span class="nd">@jit</span>
+<span class="k">def</span> <span class="nf">jit_func</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">rVals</span><span class="p">,</span> <span class="n">iVals</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+   
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    The same &#39;naive&#39; solution as the naive() but optimised with numba using </span>
+<span class="sd">    the @jit decorator</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+   
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">M_jit</span><span class="p">(</span><span class="n">rVals</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">+</span> <span class="n">iVals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="njit_par"><a class="viewcode-back" href="../../mandelbrot.html#mandelbrot.optimisation_methods.njit_par">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">njit_par</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">rVals</span><span class="p">,</span> <span class="n">iVals</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    The same &#39;naive&#39; solution as the naive() but optimised with numba using </span>
+<span class="sd">    parallelisation with the @njit decorator and the parallel flag set to True.</span>
+<span class="sd">    </span>
+<span class="sd">    The &#39;range&#39; funtions have been replaced by &#39;prange&#39; to tell the compiler</span>
+<span class="sd">    that these loops can be parallelised.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">M_jit</span><span class="p">(</span><span class="n">rVals</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">+</span> <span class="n">iVals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span> </div>
+
+
+<span class="nd">@vectorize</span><span class="p">([</span><span class="s1">&#39;float32(float32, float32)&#39;</span><span class="p">,</span> <span class="s1">&#39;float64(float64, float64)&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">_vectorised_loop</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+   
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Internal function to be used by vectorised(). The function is vectorised</span>
+<span class="sd">    using the @vectorise decorator and takes in two floating-point values and</span>
+<span class="sd">    returns a floating-point value.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">return</span> <span class="n">mb</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">r</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+   
+<div class="viewcode-block" id="vectorised"><a class="viewcode-back" href="../../mandelbrot.html#mandelbrot.optimisation_methods.vectorised">[docs]</a><span class="nd">@profile</span> 
+<span class="k">def</span> <span class="nf">vectorised</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">rVals</span><span class="p">,</span> <span class="n">iVals</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    The same &#39;naive&#39; solution as the naive() but with the nested for-loop</span>
+<span class="sd">    (looping over the reals) vectorised.</span>
+<span class="sd">        </span>
+<span class="sd">    The vectorisation strategy is to calculate a row at a time, rather than a</span>
+<span class="sd">    column, as the numpy &#39;matrix&#39; is stored C-contiguously (by default). This </span>
+<span class="sd">    means that row elements are neighbouring in memory and the implementation</span>
+<span class="sd">    should be faster this way.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+        <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">_vectorised_loop</span><span class="p">(</span><span class="n">rVals</span><span class="p">,</span> <span class="n">iVals</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">res</span> </div>
+
+
+<span class="nd">@vectorize</span><span class="p">([</span><span class="s1">&#39;float32(float32, float32)&#39;</span><span class="p">,</span> <span class="s1">&#39;float64(float64, float64)&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">_jit_vectorised_loop</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+   
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Internal function to be used by jit_vectorised(). Identical to</span>
+<span class="sd">    _vectorised_loop(), but uses the @jit version of the function calculating</span>
+<span class="sd">    the Mandelbrot set.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">return</span> <span class="n">mb</span><span class="o">.</span><span class="n">M_jit</span><span class="p">(</span><span class="n">r</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="jit_vectorised"><a class="viewcode-back" href="../../mandelbrot.html#mandelbrot.optimisation_methods.jit_vectorised">[docs]</a><span class="nd">@jit</span>
+<span class="k">def</span> <span class="nf">jit_vectorised</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">rVals</span><span class="p">,</span> <span class="n">iVals</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Same as the vectorised function, but optimised with numba using the @jit </span>
+<span class="sd">    decorator. Furthermore it calls the vectorised loop that uses the numba-</span>
+<span class="sd">    optimised version of the function calculating the Mandelbrot set.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+        <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">_jit_vectorised_loop</span><span class="p">(</span><span class="n">rVals</span><span class="p">,</span> <span class="n">iVals</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">res</span> </div>
+
+
+<span class="nd">@guvectorize</span><span class="p">([</span><span class="s1">&#39;void(int64, float64[:], float64[:], float64[:, :])&#39;</span><span class="p">],</span> <span class="s1">&#39;(), (n),(n)-&gt;(n,n)&#39;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">gu_jit_vectorised</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">rVals</span><span class="p">,</span> <span class="n">iVals</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    A general ufunc attempting to vectorise both for loops in the jit_func() </span>
+<span class="sd">    function using the @guvectorise decorator. Rather than returning the </span>
+<span class="sd">    result, it is saved in the last input argument of the function: res. This </span>
+<span class="sd">    denoted by the mapping in the argument of the decorator:</span>
+<span class="sd">        </span>
+<span class="sd">        (), (n),(n)-&gt;(n,n)</span>
+<span class="sd">        </span>
+<span class="sd">    which essentially says that it creates a n x n array from a scalar and two</span>
+<span class="sd">    n x 1 arrays.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">M_jit</span><span class="p">(</span><span class="n">rVals</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">+</span> <span class="n">iVals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="jit_save_z"><a class="viewcode-back" href="../../mandelbrot.html#mandelbrot.optimisation_methods.jit_save_z">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">jit_save_z</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">rVals</span><span class="p">,</span> <span class="n">iVals</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">z_res</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Extra function that saves the values of :math:`z` from the last iteration</span>
+<span class="sd">    in the function generating the Mandelbrot set.</span>
+<span class="sd">    This function is only used by plot_z_values.py. </span>
+
+<span class="sd">    INPUT::</span>
+<span class="sd">        </span>
+<span class="sd">        detail : int</span>
+<span class="sd">            How detailed should the simulation be.</span>
+<span class="sd">            </span>
+<span class="sd">        rVals : Numpy array of size (detail,)</span>
+<span class="sd">            The values for the real component of c to iterate over.</span>
+<span class="sd">            </span>
+<span class="sd">        iVals : Numpy array of size (detail,)</span>
+<span class="sd">            The values for the imaginary component of c to iterate over.</span>
+<span class="sd">            </span>
+<span class="sd">        res : Numpy array of floats of size (detail, detail)</span>
+<span class="sd">            Matrix of zeros that will be filled with outputs of the </span>
+<span class="sd">            function generating the Mandelbrot set.</span>
+
+<span class="sd">     OUTPUT::</span>
+<span class="sd">       </span>
+<span class="sd">        </span>
+<span class="sd">        z_res : Numpy array of complex128 of size (detail, detail)</span>
+<span class="sd">            Matrix containing the last value of z before the function</span>
+<span class="sd">            generating the Mandelbrot set returns.</span>
+<span class="sd">            </span>
+<span class="sd">        res : Numpy array of floats of size (detail, detail)</span>
+<span class="sd">            Matrix containing the result of the function generating the</span>
+<span class="sd">            Mandelbrot set for all values of c that this function has iterated </span>
+<span class="sd">            over.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+            <span class="n">z_res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">r</span><span class="p">],</span> <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">M_save_z</span><span class="p">(</span><span class="n">rVals</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">+</span> <span class="n">iVals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">z_res</span><span class="p">,</span> <span class="n">res</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">mandelbrot</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">mandelbrot</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Silvin Willemsen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

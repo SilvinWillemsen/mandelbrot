@@ -38,11 +38,35 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </section>
-<section id="module-mandelbrot.mandelbrot">
-<span id="mandelbrot-mandelbrot-module"></span><h2>mandelbrot.mandelbrot module<a class="headerlink" href="#module-mandelbrot.mandelbrot" title="Permalink to this headline">¶</a></h2>
+<section id="mandelbrot-benchmark-module">
+<h2>mandelbrot.benchmark module<a class="headerlink" href="#mandelbrot-benchmark-module" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-mandelbrot.mandelbrot_alg">
+<span id="mandelbrot-mandelbrot-alg-module"></span><h2>mandelbrot.mandelbrot_alg module<a class="headerlink" href="#module-mandelbrot.mandelbrot_alg" title="Permalink to this headline">¶</a></h2>
+<p>This file contains several functions that check whether a value <span class="math notranslate nohighlight">\(c\)</span> is
+part of the Mandelbrot set. The following functions are implemented:</p>
+<ul class="simple">
+<li><p>M: non optimised version</p></li>
+<li><p>M_jit: numba-optimised version using the &#64;jit decorator</p></li>
+<li><dl class="simple">
+<dt>M_save_z: numba-optimised version using the &#64;jit decorator that also</dt><dd><p>returns the last value of <span class="math notranslate nohighlight">\(z\)</span> before the iteration returns.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The functions are called from the functions in optimisation_methods.py.</p>
+<p>The &#64;profile decorator has been added to the non-optimised version of the 
+Mandelbrot calculation to see what lines of code are heaviest. It turns out
+that (on my machine) the if statement requires the most computation, around 
+38.5% of the total and the calculation of <span class="math notranslate nohighlight">\(z\)</span> takes aaround 33.2% of the 
+processing power. From what I see, there is not much we can do to optimise the
+code itself further.</p>
+<p>For some reason the multiprocessing_mandelbrot.py file does not run when the 
+profiling functionality is enabled. This is why it is commented out. For 
+profiling the code, uncomment this section.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="mandelbrot.mandelbrot.M">
-<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot.</span></span><span class="sig-name descname"><span class="pre">M</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot.html#M"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot.M" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mandelbrot.mandelbrot_alg.M">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot_alg.</span></span><span class="sig-name descname"><span class="pre">M</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot_alg.html#M"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot_alg.M" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function <span class="math notranslate nohighlight">\(\mathcal{M}(c)\)</span> implementing the iterative algorithm to 
 determine whether a complex number <span class="math notranslate nohighlight">\(c\)</span> is part of the Mandelbrot 
 set. The iterative algorithm is:</p>
@@ -61,8 +85,7 @@ returns</p>
 <div><p><span class="math notranslate nohighlight">\(\mathcal{M}(c) = \frac{i+1}{I}\)</span>.</p>
 </div></blockquote>
 <p>The lower this number is, the earlier <span class="math notranslate nohighlight">\(|z|\)</span> has exceeded the
-threshold and the more unstable <span class="math notranslate nohighlight">\(c\)</span> is to the iterative algorithm. 
-These are the n</p>
+threshold and the more unstable <span class="math notranslate nohighlight">\(c\)</span> is to the iterative algorithm.</p>
 <p>INPUT:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="p">:</span> <span class="nb">complex</span> <span class="nb">float</span>
     <span class="n">Starting</span> <span class="n">point</span> <span class="n">of</span> <span class="n">iterative</span> <span class="n">algorithm</span><span class="o">.</span>
@@ -83,25 +106,166 @@ These are the n</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="mandelbrot.mandelbrot.jit_naive_solution">
-<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot.</span></span><span class="sig-name descname"><span class="pre">jit_naive_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot.html#jit_naive_solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot.jit_naive_solution" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mandelbrot.mandelbrot_alg.M_jit">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot_alg.</span></span><span class="sig-name descname"><span class="pre">M_jit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot_alg.html#M_jit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot_alg.M_jit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identical function to M(c, I, T) (function above) but with the jit decorator</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mandelbrot.mandelbrot_alg.M_save_z">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot_alg.</span></span><span class="sig-name descname"><span class="pre">M_save_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot_alg.html#M_save_z"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot_alg.M_save_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identical function to M_jit(c, I, T), but also returns the current value 
+for <span class="math notranslate nohighlight">\(z\)</span>. Used by plot_z_values.py.</p>
+</dd></dl>
+
+</section>
+<section id="module-mandelbrot.multiprocessing_mandelbrot">
+<span id="mandelbrot-multiprocessing-mandelbrot-module"></span><h2>mandelbrot.multiprocessing_mandelbrot module<a class="headerlink" href="#module-mandelbrot.multiprocessing_mandelbrot" title="Permalink to this headline">¶</a></h2>
+<p>This file uses the multiprocessing module to divide the tasks when computing 
+the Mandelbrot set over several processing units.</p>
+<p>As opposed to the other optimisation techniques, all values of <span class="math notranslate nohighlight">\(c\)</span> are
+initialised in a numpy array after which its rows are used for multiprocessing.
+Similar to what has been discussed in optimisation_methods.py, rows are chosen
+rather than columns as the array is C-contiguous.</p>
+<p>The explanation of the code can be found in the comments in-code.</p>
+</section>
+<section id="module-mandelbrot.optimisation_methods">
+<span id="mandelbrot-optimisation-methods-module"></span><h2>mandelbrot.optimisation_methods module<a class="headerlink" href="#module-mandelbrot.optimisation_methods" title="Permalink to this headline">¶</a></h2>
+<p>This file contains multiple methods to optimise the calculation of the 
+Mandelbrot set in mandelbrot.py. All functions return a detail <span class="math notranslate nohighlight">\(\times\)</span>
+detail numpy array containing the output of the functions implementing the 
+Mandelbrot set.</p>
+<p>Naive implementation:
+- naive() implements the computation of the Mandelbrot set without any
+optimisation techniques.</p>
+<p>Numba, jit:
+- jit_func() is identical to naive() but optimised with numba using the 
+&#64;jit decorator</p>
+<ul class="simple">
+<li><p>njit_par() is identical to naive() but optimised with numba using the</p></li>
+</ul>
+<p>&#64;njit decorator and parallelised using the (parallel=True) flag.</p>
+<p>Due to the iterative nature of the generation of the mandelbrot set, and the 
+if-statement it contains (inevitably causing branch divergence to happen), it 
+is hard to vectorise the iterations in the Mandelbrot function itself. One 
+could, however, vectorise one level up, i.e., have the calculation for 
+multiple values of <span class="math notranslate nohighlight">\(c\)</span> happen ad the same time.</p>
+<p>Numba, vectorize:
+- vectorised() tries to vectorise the calculation of the Mandelbrot set
+by looping through the imaginary values and calculating multiple real 
+values. The inverse was not done, as the numpy arrays used are 
+C-contiguous, meaning that the values of the rows (one imaginary value
+multiple real values) are stored consecutively in memory. The function 
+calls the naive non-optimised implementation for calculating the
+Mandelbrot set for comparison.</p>
+<ul class="simple">
+<li><p>jit_vectorised() is identical to vectorised but uses the numba-optimised</p></li>
+</ul>
+<p>implementation of the function calculating the Mandelbrot set, as well as
+being numba-optimised itself using the &#64;jit decorator.py</p>
+<ul class="simple">
+<li><p>gu_jit_vectorised() attempts to use general ufuncs to implement</p></li>
+</ul>
+<p>vectorisation.</p>
+<p>The non-optimised functions (naive() and vectorised()) have an &#64;profile 
+decorator so that we can see what lines of code are heaviest. To profile the
+functions run “kernprof -l -v mandelbrot/run.py” from the root of the 
+repository.</p>
+<p>Finally, the jit_save_z() function returns – on top of the numpy array 
+containing the outputs of the Mandelbrot functions – the values of :math: <cite>z</cite> 
+from the last iteration in that function. To optimise the function, we use 
+parallelisation  using the the &#64;njit decorator with the parallel flag set to 
+True as this optimisation technique was found to speed up the algorithm most
+(see benchmark.py). The jit_save_z() method is only used by plot_z_values.py.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mandelbrot.optimisation_methods.jit_func">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.optimisation_methods.</span></span><span class="sig-name descname"><span class="pre">jit_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/optimisation_methods.html#jit_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.optimisation_methods.jit_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>The same ‘naive’ solution as the naive() but optimised with numba using 
+the &#64;jit decorator</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mandelbrot.optimisation_methods.jit_save_z">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.optimisation_methods.</span></span><span class="sig-name descname"><span class="pre">jit_save_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/optimisation_methods.html#jit_save_z"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.optimisation_methods.jit_save_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extra function that saves the values of <span class="math notranslate nohighlight">\(z\)</span> from the last iteration
+in the function generating the Mandelbrot set.
+This function is only used by plot_z_values.py.</p>
+<p>INPUT:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>   <span class="n">detail</span> <span class="p">:</span> <span class="nb">int</span>
+       <span class="n">How</span> <span class="n">detailed</span> <span class="n">should</span> <span class="n">the</span> <span class="n">simulation</span> <span class="n">be</span><span class="o">.</span>
+
+   <span class="n">rVals</span> <span class="p">:</span> <span class="n">Numpy</span> <span class="n">array</span> <span class="n">of</span> <span class="n">size</span> <span class="p">(</span><span class="n">detail</span><span class="p">,)</span>
+       <span class="n">The</span> <span class="n">values</span> <span class="k">for</span> <span class="n">the</span> <span class="n">real</span> <span class="n">component</span> <span class="n">of</span> <span class="n">c</span> <span class="n">to</span> <span class="n">iterate</span> <span class="n">over</span><span class="o">.</span>
+
+   <span class="n">iVals</span> <span class="p">:</span> <span class="n">Numpy</span> <span class="n">array</span> <span class="n">of</span> <span class="n">size</span> <span class="p">(</span><span class="n">detail</span><span class="p">,)</span>
+       <span class="n">The</span> <span class="n">values</span> <span class="k">for</span> <span class="n">the</span> <span class="n">imaginary</span> <span class="n">component</span> <span class="n">of</span> <span class="n">c</span> <span class="n">to</span> <span class="n">iterate</span> <span class="n">over</span><span class="o">.</span>
+
+   <span class="n">res</span> <span class="p">:</span> <span class="n">Numpy</span> <span class="n">array</span> <span class="n">of</span> <span class="n">floats</span> <span class="n">of</span> <span class="n">size</span> <span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">detail</span><span class="p">)</span>
+       <span class="n">Matrix</span> <span class="n">of</span> <span class="n">zeros</span> <span class="n">that</span> <span class="n">will</span> <span class="n">be</span> <span class="n">filled</span> <span class="k">with</span> <span class="n">outputs</span> <span class="n">of</span> <span class="n">the</span> 
+       <span class="n">function</span> <span class="n">generating</span> <span class="n">the</span> <span class="n">Mandelbrot</span> <span class="nb">set</span><span class="o">.</span>
+
+<span class="n">OUTPUT</span><span class="p">::</span>
+
+
+   <span class="n">z_res</span> <span class="p">:</span> <span class="n">Numpy</span> <span class="n">array</span> <span class="n">of</span> <span class="n">complex128</span> <span class="n">of</span> <span class="n">size</span> <span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">detail</span><span class="p">)</span>
+       <span class="n">Matrix</span> <span class="n">containing</span> <span class="n">the</span> <span class="n">last</span> <span class="n">value</span> <span class="n">of</span> <span class="n">z</span> <span class="n">before</span> <span class="n">the</span> <span class="n">function</span>
+       <span class="n">generating</span> <span class="n">the</span> <span class="n">Mandelbrot</span> <span class="nb">set</span> <span class="n">returns</span><span class="o">.</span>
+
+   <span class="n">res</span> <span class="p">:</span> <span class="n">Numpy</span> <span class="n">array</span> <span class="n">of</span> <span class="n">floats</span> <span class="n">of</span> <span class="n">size</span> <span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">detail</span><span class="p">)</span>
+       <span class="n">Matrix</span> <span class="n">containing</span> <span class="n">the</span> <span class="n">result</span> <span class="n">of</span> <span class="n">the</span> <span class="n">function</span> <span class="n">generating</span> <span class="n">the</span>
+       <span class="n">Mandelbrot</span> <span class="nb">set</span> <span class="k">for</span> <span class="nb">all</span> <span class="n">values</span> <span class="n">of</span> <span class="n">c</span> <span class="n">that</span> <span class="n">this</span> <span class="n">function</span> <span class="n">has</span> <span class="n">iterated</span> 
+       <span class="n">over</span><span class="o">.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mandelbrot.optimisation_methods.jit_vectorised">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.optimisation_methods.</span></span><span class="sig-name descname"><span class="pre">jit_vectorised</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/optimisation_methods.html#jit_vectorised"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.optimisation_methods.jit_vectorised" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as the vectorised function, but optimised with numba using the &#64;jit 
+decorator. Furthermore it calls the vectorised loop that uses the numba-
+optimised version of the function calculating the Mandelbrot set.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mandelbrot.optimisation_methods.naive">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.optimisation_methods.</span></span><span class="sig-name descname"><span class="pre">naive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/optimisation_methods.html#naive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.optimisation_methods.naive" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="mandelbrot.mandelbrot.naive_solution">
-<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot.</span></span><span class="sig-name descname"><span class="pre">naive_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot.html#naive_solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot.naive_solution" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mandelbrot.optimisation_methods.njit_par">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.optimisation_methods.</span></span><span class="sig-name descname"><span class="pre">njit_par</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/optimisation_methods.html#njit_par"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.optimisation_methods.njit_par" title="Permalink to this definition">¶</a></dt>
+<dd><p>The same ‘naive’ solution as the naive() but optimised with numba using 
+parallelisation with the &#64;njit decorator and the parallel flag set to True.</p>
+<p>The ‘range’ funtions have been replaced by ‘prange’ to tell the compiler
+that these loops can be parallelised.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mandelbrot.optimisation_methods.profile">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.optimisation_methods.</span></span><span class="sig-name descname"><span class="pre">profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/optimisation_methods.html#profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.optimisation_methods.profile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="mandelbrot.mandelbrot.njit_naive_solution">
-<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot.</span></span><span class="sig-name descname"><span class="pre">njit_naive_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot.html#njit_naive_solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot.njit_naive_solution" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mandelbrot.optimisation_methods.vectorised">
+<span class="sig-prename descclassname"><span class="pre">mandelbrot.optimisation_methods.</span></span><span class="sig-name descname"><span class="pre">vectorised</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/optimisation_methods.html#vectorised"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.optimisation_methods.vectorised" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="mandelbrot.mandelbrot.profile">
-<span class="sig-prename descclassname"><span class="pre">mandelbrot.mandelbrot.</span></span><span class="sig-name descname"><span class="pre">profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mandelbrot/mandelbrot.html#profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mandelbrot.mandelbrot.profile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+</section>
+<section id="module-mandelbrot.plot_z_values">
+<span id="mandelbrot-plot-z-values-module"></span><h2>mandelbrot.plot_z_values module<a class="headerlink" href="#module-mandelbrot.plot_z_values" title="Permalink to this headline">¶</a></h2>
+<p>This script retrieves and plots the z values before the function generating 
+the Mandelbrot set returns.</p>
+<p>This function allows the number of iterations as well as the threshold to be
+changed from this script</p>
+</section>
+<section id="module-mandelbrot.run">
+<span id="mandelbrot-run-module"></span><h2>mandelbrot.run module<a class="headerlink" href="#module-mandelbrot.run" title="Permalink to this headline">¶</a></h2>
+<p>This script runs the methods in optimisation_methods.py that generate the
+Mandelbrot sets using different optimisation techniques. The script plots and
+saves the results of the sets generated by each individual method. As the 
+underlying algorithm is the same (just different optimisations) the plots
+should be identical.</p>
 </section>
 <section id="module-mandelbrot">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mandelbrot" title="Permalink to this headline">¶</a></h2>

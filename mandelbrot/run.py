@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import time
-import optimisation_methods as OM
+import mandelbrot.optimisation_methods as OM
 
 
 # specify the detail of the simulation
@@ -33,7 +33,7 @@ methods = ['OM.naive(detail, rVals, iVals, res)',
 
 
 # plot the results?
-plotting = True
+plotting = False
 
 # run all methods
 for m in methods:

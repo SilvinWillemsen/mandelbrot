@@ -17,14 +17,14 @@ allocate memory, we do it this way.
 Results and discussion:
     
     Results show that the naive implementation is by far the slowest (as 
-    expected).  Vectorisation already helps quite a bit and causes a ca. 3.57x 
+    expected).  Vectorisation already helps quite a bit and causes a ca. 3.3x 
     speedup when compared to the non-optimised method. The main speed-up, 
     however, happens by usin!g jit-compilation which speeds the naive 
-    implementation up by around x106.4! Vectorisation after using jit 
+    implementation up by around x108.3! Vectorisation after using jit 
     compilation (using neither normal nor general ufuncs) does not change 
     the speed by a significant amount. The parallelisation does improve the 
-    speed by an additional x2.93 for a total x311.3 speed up from naive to 
-    optimised using @njit(parallel=True). 
+    speed for a total x320.5 speed up from naive to optimised using 
+    @njit(parallel=True). 
 
                       
 """
@@ -33,7 +33,7 @@ import numpy as np
 import time
 import pandas as pd
 import matplotlib.pyplot as plt
-import optimisation_methods as OM
+import mandelbrot.optimisation_methods as OM
 
         
 # Initialise dataframe to save execution time per method
@@ -49,7 +49,10 @@ methods = ['OM.naive(detail, rVals, iVals, res)',
 
 # if we want to save the csv file containing the processing time for each
 # individual method and overwrite the current one
-save_csv = False;
+save_csv = False
+
+# if we want to save the resulting plots as pdf and overwrite the current ones
+save_files = True
 
 # sepecify amount of detail
 detail = 5000
@@ -103,8 +106,8 @@ x_data = range(1,len(methods)+1)
 fig = plt.figure(figsize=(7,5))
 fig.add_axes([0.1, 0.25, 0.85, 0.7])
 
-plt.plot(dataframe.loc[:,'Time [s]'])
-plt.xticks(dataframe.loc[:, 'Method'], rotation=45)
+plt.plot(x_data, dataframe.loc[:,'Time [s]'])
+plt.xticks(x_data, dataframe.loc[:, 'Method'], rotation=45)
 plt.xlabel('Method')
 plt.ylabel('Time [s]')
 plt.grid()
@@ -112,7 +115,8 @@ plt.title(f'Time to compute {detail:d} x {detail:d} values of the Mandelbrot set
 plt.show()
 
 # save figure
-fig.savefig('benchmark_output/time_per_method_linear.pdf')
+if save_files:
+    fig.savefig('benchmark_output/time_per_method_linear.pdf')
 
 
 # plot results logarithmically
@@ -128,7 +132,8 @@ plt.title(f'Time to compute {detail:d} x {detail:d} values of the Mandelbrot set
 plt.show()
 
 # save figure
-fig.savefig('benchmark_output/time_per_method_logarithmic.pdf')
+if save_files:
+    fig.savefig('benchmark_output/time_per_method_logarithmic.pdf')
 
 # overwrite the csv file if specified at the beginning
 if save_csv:
